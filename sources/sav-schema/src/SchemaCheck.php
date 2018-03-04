@@ -11,14 +11,8 @@ class SchemaCheck
     return $this->opts["check"]($value, $args);
   }
   function __get($_property) {
-    if ($_property === 'name') {
-      return $this->opts["name"];
-    }
-    if ($_property === 'alias') {
-      return $this->opts["alias"];
-    }
-    if ($_property === 'argc') {
-      return $this->opts["argc"] || 1;
+    if (isset($this->opts[$_property])) {
+      return $this->opts[$_property];
     }
   }
 }

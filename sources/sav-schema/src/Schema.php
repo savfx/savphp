@@ -3,6 +3,7 @@ namespace SavSchema;
 
 require_once __DIR__."/consts.php";
 require_once __DIR__."/types.php";
+require_once __DIR__."/checks.php";
 
 class Schema {
   public function __construct($opts = []) {
@@ -11,7 +12,7 @@ class Schema {
     $this->nameMap = array();
     $this->checks = array();
     registerTypes($this);
-    // registerChecks($this);
+    registerChecks($this);
   }
   public function declare($data, $opts = array()) {
     if (isArray($data)) {
@@ -49,13 +50,13 @@ class Schema {
   public function applyChecks($value, $rules) {
     if (isArray($rules)) {
       foreach ($rules as $rule) {
-        $ruller = $this->checks[$rule["name"]];
+        $ruller = $this->checks[$rule[0]];
         if ($ruller) {
           if (!$ruller->check($value, $rule)) {
             return $rule;
           }
         } else {
-          throw new SchemaError("rule", [$rule["name"]]);
+          throw new SchemaError("rule", [$rule[0]]);
         }
       }
     }
