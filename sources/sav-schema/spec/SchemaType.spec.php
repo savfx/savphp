@@ -97,7 +97,7 @@ describe("SchemaType", function() {
     expect($schema->Integer->check(4294967296))->toBe(false);
 
     expect($schema->Long->check(1))->toBe(true);
-    expect($schema->Long->check(-9007199254740991))->toBe(false);
+    expect($schema->Long->check(-9007199254740992))->toBe(false);
     expect($schema->Long->check(9007199254740992))->toBe(false);
 
     expect($schema->Byte->check(1.2))->toBe(false);
