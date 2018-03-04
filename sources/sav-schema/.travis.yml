@@ -1,7 +1,10 @@
+sudo: required
+dist: trusty
 language: php
 php:
   - 7.0
 before_script:
+  - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then composer config -g github-oauth.github.com $GITHUB_COMPOSER_AUTH; fi
   - composer install --no-interaction
 script:
   - ./vendor/bin/kahlan --config=kahlan-config.travis.php --clover=clover.xml
