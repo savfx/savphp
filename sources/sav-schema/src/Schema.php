@@ -27,7 +27,10 @@ class Schema {
     }
   }
   public function load($data, $opts = array()) {
-    foreach (['fields', 'enums', 'lists', 'structs', 'schemas'] as $key) {
+    if (isset($data['fields'])) {
+      createFields($this, $data['fields'], $opts);
+    }
+    foreach (['enums', 'lists', 'structs', 'schemas'] as $key) {
       if (isset($data[$key])) {
         $this->declare($data[$key], $opts);
       }
@@ -122,19 +125,15 @@ function createSchema($schema, $data, $opts) {
     $ret->schemaType = SAV_SCHEMA_STURCT;
     $ret->fields = $fields;
   } else if (isset($data['refer'])) {
-    $refer = $data['refer'];
     $ret = new SchemaRefer($schema, $data);
     $ret->schemaType = SAV_SCHEMA_REFER;
   } else if (isset($data['list'])) {
-    $list = $data['list'];
     $ret = new SchemaList($schema, $data);
     $ret->schemaType = SAV_SCHEMA_LIST;
   } else if (isset($data['enums'])) {
-    $enums = $data['enums'];
     $ret = new SchemaEnum($schema, $data);
     $ret->schemaType = SAV_SCHEMA_ENUM;
   } else if (isset($data['type'])) {
-    $type = $data['type'];
     $ret = new SchemaField($schema, $data);
     $ret->schemaType = SAV_SCHEMA_FIELD;
   }
@@ -142,8 +141,19 @@ function createSchema($schema, $data, $opts) {
   return $ret;
 }
 
+function createFields($schema, $fields, $opts) {
+  foreach ($fields as $key => $value) {
+    if (!isset($value['id'])) {
+      $value['id'] = $key;
+    }
+    $ret = new SchemaField($schema, $value);
+    $ret->schemaType = SAV_SCHEMA_FIELD;
+    exportSchema($schema, $ret);
+  }
+}
+
 function exportSchema($schema, $ref) {
-  if (isset($ref->id)) {
+  if (!is_null($ref->id)) {
     $schema->idMap[$ref->id] = $ref;
   }
   if (($ref->schemaType != SAV_SCHEMA_FIELD) && $ref->name) {
