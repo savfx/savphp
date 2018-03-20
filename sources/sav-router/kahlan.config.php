@@ -39,7 +39,7 @@ Filters::apply($this, 'reporting', function($next) {
         'collector'  => $reporter,
         'file'       => 'codeclimate.json',
         'branch'     => getenv('TRAVIS_BRANCH') ?: null,
-        'repo_token' => 'dc516fa738ff289d5ec85aeb481561e1cea7a0e483b21188469ccaa29783d99c'
+        'repo_token' => '104cbb5023290a5c94ebac2484cefbbff5aa1a6dee0572bbea5a2acc8fc2acf0'
     ]);
     return $next();
 });
