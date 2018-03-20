@@ -1,0 +1,29 @@
+{
+    "name": "savphp/sav",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jetiny",
+            "email": "86267344@qq.com"
+        }
+    ],
+    "scripts": {
+        "test": "kahlan",
+        "cov": "kahlan --coverage=3",
+        "covd": "kahlan --coverage=4"
+    },
+    "autoload":{
+        "psr-4":{
+            "Sav\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^5.3 || ^7.0",
+        "savphp/sav-router": "^1.0",
+        "savphp/sav-schema": "^1.0"
+    },
+    "require-dev": {
+        "kahlan/kahlan": "^4.0"
+    }
+}
