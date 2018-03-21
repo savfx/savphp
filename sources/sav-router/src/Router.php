@@ -2,6 +2,7 @@
 namespace SavRouter;
 
 use SavRouter\PathToRegexp;
+use SavUtil\CaseConvert;
 
 class Router {
   public function __construct ($opts = array()) {
@@ -42,8 +43,8 @@ class Router {
   }
   public function createModalRoute($opts) {
     $route = array(
-      "name" => pascalCase($opts['name']),
-      "path" => convertCase($this->opts['caseType'], $opts['name']), 
+      "name" => CaseConvert::pascalCase($opts['name']),
+      "path" => CaseConvert::convert($this->opts['caseType'], $opts['name']), 
       "opts" => $opts, 
       "keys" => array(), 
       "childs" => createMethods(array())
@@ -80,8 +81,8 @@ class Router {
       $method = $this->opts['method'];
     }
     $route = array(
-      "name" => $modal['name'] . pascalCase($opts['name']), 
-      "path" => convertCase($this->opts['caseType'], $opts['name']), 
+      "name" => $modal['name'] . CaseConvert::pascalCase($opts['name']), 
+      "path" => CaseConvert::convert($this->opts['caseType'], $opts['name']), 
       "opts" => $opts, 
       "method" => $method, 
       "modal" => &$modal, 
@@ -177,47 +178,4 @@ function stripPrefix($src, $prefix) {
     }
   }
   return $src;
-}
-
-function camelCase ($str) {
-  // /[-_](\w)/g
-  if (!is_string($str)) {
-    return '';
-  }
-  return lcfirst(preg_replace_callback('/[-_](\w)/', function ($mats) {
-    if (isset($mats[1])) {
-      return strtoupper($mats[1]);
-    }
-    return '';
-  }, $str));
-}
-
-function hyphenCase($str) {
-  return preg_replace_callback('/([A-Z])/', function ($mats) {
-    return '-' . $mats[0];
-  }, camelCase($str));
-}
-
-function snakeCase ($str) {
-  return preg_replace_callback('/([A-Z])/', function ($mats) {
-    return '_' . $mats[0];
-  }, camelCase($str));
-}
-
-function pascalCase ($str) {
-  return ucfirst(camelCase($str));
-}
-
-function convertCase($type, $str) {
-  switch ($type) {
-    case 'pascal':
-      return pascalCase($str);
-    case 'camel':
-      return camelCase($str);
-    case 'snake':
-      return snakeCase($str);
-    case 'hyphen':
-      return hyphenCase($str);
-  }
-  return $str;
 }
