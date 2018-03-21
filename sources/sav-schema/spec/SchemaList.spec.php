@@ -5,7 +5,7 @@ use SavSchema\Schema;
 describe("SchemaList", function() {
   $schema = new Schema();
   it("SchemaList.StringList", function() use(&$schema){
-    $schema->declare([
+    $schema->build([
       "name" => "StringList",
       "list" => "String"
     ]);

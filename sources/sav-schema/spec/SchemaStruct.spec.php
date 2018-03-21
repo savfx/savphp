@@ -5,14 +5,14 @@ use SavSchema\Schema;
 describe("SchemaStruct", function() {
   $schema = new Schema();
   it("SchemaStruct.basic", function() use(&$schema){
-    $schema->declare([
+    $schema->build([
       "name" => "Sex",
       "enums" => [
         ["key" => "male", "value" => 1],
         ["key" => "female", "value" => 2],
       ]
     ]);
-    $schema->declare([
+    $schema->build([
       "name" => "User",
       "props" => [
         "name" => "String",
@@ -47,7 +47,7 @@ describe("SchemaStruct", function() {
   });
 
   it("SchemaStruct.fieldOptions", function() use(&$schema){
-    $schema->declare([
+    $schema->build([
       "name" => "User",
       "props" => [
         "name" => [
@@ -69,7 +69,7 @@ describe("SchemaStruct", function() {
   });
 
   it("SchemaStruct.fieldOption.eql", function() use(&$schema){
-    $schema->declare([
+    $schema->build([
       "name" => "User",
       "props" => [
         "password" => "String",

@@ -5,11 +5,11 @@ use SavSchema\Schema;
 describe("SchemaRefer", function() {
   $schema = new Schema();
   it("SchemaRefer.StringList", function() use(&$schema){
-    $schema->declare([
+    $schema->build([
       "name" => "StringList",
       "list" => "String"
     ]);
-    $ReferStringList = $schema->declare([
+    $ReferStringList = $schema->build([
       "refer" => "StringList"
     ]);
     expect($ReferStringList)->toBeA("object");

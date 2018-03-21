@@ -17,11 +17,11 @@ class Schema {
     registerTypes($this);
     registerChecks($this);
   }
-  public function declare($data, $opts = array()) {
+  public function build($data, $opts = array()) {
     if (isArray($data)) {
       $ret = [];
       foreach ($data as $it) {
-        array_push($ret, $this->declare($it, $opts));
+        array_push($ret, $this->build($it, $opts));
       }
       return $ret;
     } else if (isObject($data)) {
@@ -35,7 +35,7 @@ class Schema {
     }
     foreach (['enums', 'lists', 'structs', 'schemas'] as $key) {
       if (isset($data[$key])) {
-        $this->declare($data[$key], $opts);
+        $this->build($data[$key], $opts);
       }
     }
   }

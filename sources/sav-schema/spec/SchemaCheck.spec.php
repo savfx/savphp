@@ -5,7 +5,7 @@ describe("SchemaCheck", function() {
 
   it("SchemaCheck.rules", function() {
     $schema = new Schema();
-    $User = $schema->declare([
+    $User = $schema->build([
       "props" => [
         "name" => [
           "type" => "String",
