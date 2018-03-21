@@ -3,6 +3,7 @@ dist: trusty
 language: php
 php:
   - 7.0
+  - 5.5
 before_script:
   - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then composer config -g github-oauth.github.com $GITHUB_COMPOSER_AUTH; fi
   - composer install --no-interaction
