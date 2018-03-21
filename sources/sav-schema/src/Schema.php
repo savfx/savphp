@@ -6,8 +6,11 @@ require_once __DIR__."/types.php";
 require_once __DIR__."/checks.php";
 
 class Schema {
-  public function __construct($opts = []) {
-    $this->opts = array_merge(array("strict" => true), $opts);
+  public function __construct($opts = array()) {
+    if (!array_key_exists('strict', $opts)) {
+      $opts['strict'] = true;
+    }
+    $this->opts = $opts;
     $this->idMap = array();
     $this->nameMap = array();
     $this->checks = array();
