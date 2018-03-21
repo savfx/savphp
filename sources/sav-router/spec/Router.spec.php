@@ -4,12 +4,13 @@ use SavRouter\Router;
 
 describe("Router", function() {
   
-  it("Router.declare", function() {
+  it("Router.build", function() {
     $router = new Router();
-    $m = $router->declare(array("name" => "Account"));
-    $a = $router->declare(array("name" => "login", "modal" => "Account"));
+    $m = $router->build(array("name" => "Account"));
+    $a = $router->build(array("name" => "login", "modal" => "Account"));
     expect($m)->toBeA('array');
     expect($a)->toBeA('array');
+    expect($router->getRoutes())->toBeA('array');
   });
 
   it('stripPrefix', function () {

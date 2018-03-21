@@ -17,9 +17,13 @@ class Router {
     }
     $this->modalMap = array();
     $this->modalRoutes = array();
+    $this->allRoutes = array();
     $this->absoluteRoutes = createMethods(array());
   }
-  public function declare($target) {
+  public function getRoutes () {
+    return $this->allRoutes;
+  }
+  public function build($target) {
     if (isset($target["modal"])) {
       return $this->createActionRoute($target);
     }
@@ -32,12 +36,12 @@ class Router {
         if (!is_numeric($key)) {
           $it['name'] = $key;
         }
-        $this->declare($it);
+        $this->build($it);
       }
     }
     if (isset($data['actions'])) {
       foreach($data['actions'] as $it) {
-        $this->declare($it);
+        $this->build($it);
       }
     }
   }
@@ -66,7 +70,7 @@ class Router {
           $it['name'] = $key;
         }
         $it['modal'] = $opts['name'];
-        $this->declare($it);
+        $this->build($it);
       }
     }
     return $route;
@@ -105,6 +109,7 @@ class Router {
       $modal['childs'][$method][] = &$route;
       $modal['childs']['ANY'][] = &$route;
     }
+    $this->allRoutes[] = &$route;
     return $route;
   }
   public function matchRoute($path, $method) {
