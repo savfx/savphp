@@ -18,6 +18,7 @@ class Sav {
       'classSuffix' => '', // 模块名称后缀
       'baseUrl' => '',    // 项目基础URL
       'psr' => false, // 使用 psr标准加载模块
+      'disableSchemaCheck' => false, // 是否禁用shcema校验
     );
     foreach ($opts as $key => $value) {
       $this->opts[$key] = $value;
@@ -31,20 +32,64 @@ class Sav {
     $this->schema->load($json);
   }
 
-  public function execute() {
-    $uri = $_SERVER['REQUEST_URI'];
+  public function execute($uri = null, $method = null, $data = null) {
+    if (is_null($uri)) {
+      $uri = $_SERVER['REQUEST_URI'];
+      $filePath = "/". basename($_SERVER['SCRIPT_FILENAME']);
+      if (($pos = strpos($uri, $filePath)) != false) {
+        $uri = substr($uri, 0, $pos + 1) . substr($uri, $pos + strlen($filePath) + 1);
+      }
+    }
+    if (is_null($method)) {
+      $method = $_SERVER['REQUEST_METHOD'];
+    }
+    if (is_null($data)) {
+      $data = $_REQUEST;
+    }
+    try {
+      $ctx = $this->prepare($uri, $method, $data);
+      if (isset($ctx->route)) {
+        call_user_func($ctx->invoke);
+        $data = $ctx->output;
+        if (is_string($data)) {
+          echo $data;
+        } else if (is_array($data) || is_object($data)) {
+          echo json_encode($data);
+        }
+      } else {
+        header("HTTP/1.1 404 Not Found");
+      }
+    } catch (\Exception $err) {
+      header("HTTP/1.1 500 Internal Server Error");
+      echo json_encode(array(
+        "error" => array(
+          "msg" => $err->getMessage(),
+        )
+      ));
+    }
+  }
+
+  public function prepare($uri, $method, $req, $ctx = null) {
+    $ctx = $this->buindCtx($ctx);
     if (($pos = strpos($uri, '?')) > 0) {
       $uri = substr($uri, 0, $pos);
     }
     $uri = preg_replace('/\/+/', '/', $uri);
-    $this->invoke($uri, $_SERVER['REQUEST_METHOD']);
-  }
-
-  public function invoke($url, $methd, $ctx) {
-    $mat = $this->matchUrl($url, $method);
+    $mat = $this->matchUrl($uri, $method);
     if ($mat) {
-      $this->resolveRoute($mat['route'], $mat);
+      // 'inSchemaName', 'outSchemaName', 'inSchema', 'outSchema',
+      // 'class', 'instance',
+      $this->resolveRoute($mat['route'], $ctx);
+      $args = $req;
+      foreach ($mat['params'] as $key => $value) {
+        $args[$key] = $value;
+      }
+      foreach (array('path', 'route') as $key) {
+        $ctx->{$key} = $mat[$key];
+      }
+      $ctx->input = $args;
     }
+    return $ctx;
   }
 
   public function matchUrl($url, $method) {
@@ -60,21 +105,24 @@ class Sav {
     return $this->router->matchRoute($url, $method);
   }
 
-  public function resolveRoute ($route, &$ret) {
+  public function resolveRoute ($route, $ret) {
     // 添加 class method instance request requestSchema response responseSchema
     $this->getRouteClassMethod($route, $ret);
-    $this->getRouteSchema($route, $ret, 'request');
-    $this->getRouteSchema($route, $ret, 'response');
-    $ret['instance'] = $this->getModalInstance($ret['class']);
+    $this->getRouteSchema($route, $ret, 'request', 'in');
+    $this->getRouteSchema($route, $ret, 'response', 'out');
+    $ret->instance = $this->getModalInstance($ret->className);
     return $ret;
   }
 
-  public function getRouteClassMethod ($route, &$ret) {
+  public function getRouteClassMethod ($route, $ret) {
     $cls = $route['modal']['name'];
-    $ret['method'] = $route['opts']['name'];
     $caseType = $this->opts['classCase'];
     if ($caseType) {
-      $cls = CaseConvert::convert($caseType, $cls);
+      if (is_callable($caseType)) { //TODO 需要配合MSVC类格式?
+        $cls = $caseType($cls);
+      } else {
+        $cls = CaseConvert::convert($caseType, $cls);
+      }
     }
     $namespace = $this->opts['namespace']; // Sav
     if ($namespace) {
@@ -84,10 +132,11 @@ class Sav {
     if ($classSuffix) {
       $cls = $cls . $classSuffix;
     }
-    $ret['class'] = $cls;
+    $ret->className = $cls;
+    $ret->methodName = $route['opts']['name'];
   }
 
-  public function getRouteSchema ($route, &$ret, $type) {
+  public function getRouteSchema ($route, &$ret, $type, $name) {
     $schemaName = null;
     $struct = null;
     $opts = $route['opts'];
@@ -103,8 +152,8 @@ class Sav {
         }
       }
     }
-    $ret[$type] = $schemaName;
-    $ret[$type.'Schema'] = $struct;
+    $ret->{$name.'Name'} = $schemaName;
+    $ret->{$name.'Schema'} = $struct;
   }
 
   public function getModalInstance ($className) {
@@ -122,6 +171,38 @@ class Sav {
       $instances[$className] = new $className();
     }
     return $instances[$className];
+  }
+
+  public function buindCtx ($ctx = null) {
+    if (!isset($ctx)) {
+      $ctx = new \StdClass();
+    }
+    $ctx->sav = $this;
+    $ctx->schema = $this->schema;
+    $ctx->invoke = function () use (&$ctx){
+      $ctx->sav->invokeCtx($ctx);
+    };
+    $ctx->execute = function ($input) use (&$ctx){
+      return call_user_func_array(array($ctx->instance, $ctx->methodName), array($ctx, $input));
+    };
+    return $ctx;
+  }
+
+  public function invokeCtx ($ctx) {
+    $schemaCheck = !$this->opts['disableSchemaCheck'];
+    $input = array();
+    if ($schemaCheck) {
+      if ($ctx->inSchema) {
+        $input = $ctx->inSchema->extract($ctx->input);
+      }
+    }
+    $output = call_user_func($ctx->execute, $input);
+    if ($schemaCheck) {
+      if ($ctx->outSchema) {
+        $output = $ctx->outSchema->check($output);
+      }
+    }
+    $ctx->output = $output;
   }
 
 }
