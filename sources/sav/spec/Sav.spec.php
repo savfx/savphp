@@ -17,10 +17,15 @@ describe("Sav", function() {
           "request" => "ReqAccountLogin", "response" => "ResAccountLogin")
       ),
     ));
-    $mat = $sav->match("/account/login", "POST");
-    // var_dump(array_keys($sav->schema->nameMap);
-    var_dump($mat);
-    expect($sav)->toBeA('object');
+    $mat = $sav->execute("/account/login", "POST", array(
+      "username" => "jetiny",
+      "password" => "jetiny",
+    ), true);
+    expect($mat)->toBeA('string');
+    expect($mat)->toEqual(json_encode(array(
+      "id" => 123,
+      "welcome" => "welcome jetiny"
+    )));
   });
 
 });

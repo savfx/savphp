@@ -10,10 +10,10 @@ class Sav {
 
   function __construct($opts = array()) {
     $this->opts = array(
+      'contractFile' => null, // 合约文件
       'modalPath' => 'modals', // 模块目录
       'schemaPath' => 'schemas', // 模型目录
       'namespace' => '', // 模块命名空间
-      'auth' => null, // 是否需要认证
       'classCase' => '', // 类名规范
       'classSuffix' => '', // 模块名称后缀
       'baseUrl' => '',    // 项目基础URL
@@ -25,6 +25,11 @@ class Sav {
     }
     $this->router = new Router($opts);
     $this->schema = new Schema($opts);
+    $this->errorHandler = null;
+    $this->authHandler = null;
+    if ($this->opts["contractFile"]) {
+      $this->load(include_once($this->opts["contractFile"]));
+    }
   }
 
   public function load ($json) {
@@ -32,7 +37,7 @@ class Sav {
     $this->schema->load($json);
   }
 
-  public function execute($uri = null, $method = null, $data = null) {
+  public function execute($uri = null, $method = null, $data = null, $cli = false) {
     if (is_null($uri)) {
       $uri = $_SERVER['REQUEST_URI'];
       $filePath = "/". basename($_SERVER['SCRIPT_FILENAME']);
@@ -48,25 +53,56 @@ class Sav {
     }
     try {
       $ctx = $this->prepare($uri, $method, $data);
-      if (isset($ctx->route)) {
-        call_user_func($ctx->invoke);
-        $data = $ctx->output;
-        if (is_string($data)) {
-          echo $data;
-        } else if (is_array($data) || is_object($data)) {
-          echo json_encode($data);
-        }
-      } else {
-        header("HTTP/1.1 404 Not Found");
+      $data = $this->invoke($ctx);
+      if ($cli) {
+        return $data;
       }
+      echo $data;
     } catch (\Exception $err) {
-      header("HTTP/1.1 500 Internal Server Error");
+      if ($cli) {
+        throw $err;
+      }
+      if ($this->errorHandler) {
+        return call_user_func_array($this->errorHandler, array(
+          "ctx" => $ctx,
+          "err" => $err,
+        ));
+      }
+      if (isset($err->staus)) {
+        http_response_code($err->staus);
+      }
       echo json_encode(array(
         "error" => array(
           "msg" => $err->getMessage(),
         )
       ));
     }
+  }
+
+  public function invoke ($ctx, $encode = true) {
+    try {
+      if (isset($ctx->route)) {
+        if ($this->authHandler) {
+          call_user_func_array($this->authHandler, array($ctx->route));
+        }
+        call_user_func($ctx->invoke);
+        $data = $ctx->output;
+        if ($encode) {
+          if (is_string($data)) {
+            return $data;
+          } else if (is_array($data) || is_object($data)) {
+            return json_encode($data);
+          }
+        }
+        return $data;
+      }
+    } catch (\Exception $err) {
+      $err->staus = 500;
+      throw $err;
+    }
+    $exp = new \Exception("Not Found");
+    $exp->staus = 404;
+    throw $exp;
   }
 
   public function prepare($uri, $method, $req, $ctx = null) {
@@ -203,6 +239,14 @@ class Sav {
       }
     }
     $ctx->output = $output;
+  }
+
+  public function setErrorHandler ($handler) {
+    $this->errorHandler = $handler;
+  }
+
+  public function setAuthHandler ($handler) {
+    $this->authHandler = $handler;
   }
 
 }
