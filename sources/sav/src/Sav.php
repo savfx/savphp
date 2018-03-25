@@ -5,6 +5,7 @@ namespace Sav;
 use SavRouter\Router;
 use SavSchema\Schema;
 use SavUtil\CaseConvert;
+use Sav\Context;
 
 class Sav {
 
@@ -27,6 +28,7 @@ class Sav {
     $this->schema = new Schema($opts);
     $this->errorHandler = null;
     $this->authHandler = null;
+    $this->funcMap = array();
     if ($this->opts["contractFile"]) {
       $this->load(include_once($this->opts["contractFile"]));
     }
@@ -68,8 +70,8 @@ class Sav {
           "err" => $err,
         ));
       }
-      if (isset($err->staus)) {
-        http_response_code($err->staus);
+      if (isset($err->status)) {
+        http_response_code($err->status);
       }
       echo json_encode(array(
         "error" => array(
@@ -97,11 +99,14 @@ class Sav {
         return $data;
       }
     } catch (\Exception $err) {
-      $err->staus = 500;
+      if (!isset($err->status)) {
+        $errCode = $err->getCode();
+        $err->status = $errCode ? $errCode : 500;
+      }
       throw $err;
     }
-    $exp = new \Exception("Not Found");
-    $exp->staus = 404;
+    $exp = new \Exception("Not Found", 404);
+    $exp->status = 404;
     throw $exp;
   }
 
@@ -211,7 +216,7 @@ class Sav {
 
   public function buindCtx ($ctx = null) {
     if (!isset($ctx)) {
-      $ctx = new \StdClass();
+      $ctx = new Context($this);
     }
     $ctx->sav = $this;
     $ctx->schema = $this->schema;
@@ -247,6 +252,16 @@ class Sav {
 
   public function setAuthHandler ($handler) {
     $this->authHandler = $handler;
+  }
+
+  public function register ($name, $func) {
+    $this->funcMap[$name] = $func;
+  }
+
+  public function getInstance ($ctx, $name) {
+    if (isset($this->funcMap[$name])) {
+      return $ctx->{$name} = call_user_func_array($this->funcMap[$name], array($ctx));
+    }
   }
 
 }

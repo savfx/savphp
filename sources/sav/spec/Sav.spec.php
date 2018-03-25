@@ -28,4 +28,47 @@ describe("Sav", function() {
     )));
   });
 
+  it("Sav.register", function (){
+    $sav = new Sav();
+    $sav->register("db", function ($ctx){
+      return "db";
+    });
+    $ctx = $sav->prepare("/", "GET", array());
+    expect($ctx->db)->toEqual("db");
+  });
+
+  it("Sav.setErrorHandler", function (){
+    $sav = new Sav();
+    $sav->setErrorHandler(function ($err){
+      expect($err)->toBeA("object");
+      expect($err->status)->toEqual(404);
+    });
+    expect(function () use($sav){
+      $sav->execute("/", "GET", array(), true);
+    })->toThrow();
+  });
+
+  it("Sav.setAuthHandler", function (){
+    $sav = new Sav();
+    $sav->load(array(
+      "modals" => array(
+        array("name" => "Account")
+      ),
+      "actions" => array(
+        array("name" => "login", "modal" => "Account", "auth" => true)
+      ),
+    ));
+    $sav->setErrorHandler(function ($err){
+      expect($err)->toBeA("object");
+      expect($err->status)->toEqual(403);
+    });
+    $sav->setAuthHandler(function ($route, $ctx){
+      expect($route)->toBeA('array');
+      throw new \Exception("禁止访问", 403);
+    });
+    expect(function () use($sav){
+      $sav->execute("/account/login", "POST", array(), true);
+    })->toThrow();
+  });
+
 });
