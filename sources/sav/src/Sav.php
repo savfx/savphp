@@ -237,7 +237,26 @@ class Sav {
         $input = $ctx->inSchema->extract($ctx->input);
       }
     }
-    $output = call_user_func($ctx->execute, $input);
+    ob_start();
+    $output = null;
+    $err = null;
+    try {
+      $output = call_user_func($ctx->execute, $input);
+    } catch (\Exception $exp) {
+      $err = $exp;
+    }
+    $len = ob_get_length();
+    if ($len) {
+      $buf = ob_get_clean();
+      if (!isset($output)) {
+        $ctx->buffer = $buf;
+        $output = $buf;
+      }
+    }
+    if ($err) {
+      throw $err;
+    }
+
     if ($schemaCheck) {
       if ($ctx->outSchema) {
         $output = $ctx->outSchema->check($output);
