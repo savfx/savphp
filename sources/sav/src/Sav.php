@@ -29,6 +29,7 @@ class Sav {
     $this->errorHandler = null;
     $this->authHandler = null;
     $this->funcMap = array();
+    $this->methodMap = array();
     if ($this->opts["contractFile"]) {
       $this->load(include_once($this->opts["contractFile"]));
     }
@@ -273,13 +274,27 @@ class Sav {
     $this->authHandler = $handler;
   }
 
-  public function register ($name, $func) {
+  public function prop ($name, $func) {
     $this->funcMap[$name] = $func;
   }
 
   public function getInstance ($ctx, $name) {
     if (isset($this->funcMap[$name])) {
-      return $ctx->{$name} = call_user_func_array($this->funcMap[$name], array($ctx));
+      $val = $this->funcMap[$name];
+      if (is_callable($val)) {
+        $val = call_user_func_array($val, array($ctx));
+      }
+      return $ctx->{$name} = $val;
+    }
+  }
+
+  public function method ($name, $func) {
+    $this->methodMap[$name] = $func;
+  }
+
+  public function callMethod($ctx, $method, $args) {
+    if (isset($this->methodMap[$method])) {
+      return call_user_func_array($this->methodMap[$method], $args);
     }
   }
 

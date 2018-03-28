@@ -12,4 +12,8 @@ class Context {
     return $this->sav->getInstance($this, $name);
   }
 
+  function __call($name, $args) {
+    return $this->sav->callMethod($this, $name, $args);
+  }
+
 }

@@ -28,13 +28,15 @@ describe("Sav", function() {
     )));
   });
 
-  it("Sav.register", function (){
+  it("Sav.prop", function (){
     $sav = new Sav();
-    $sav->register("db", function ($ctx){
+    $sav->prop("db", function ($ctx){
       return "db";
     });
+    $sav->prop("test", "test");
     $ctx = $sav->prepare("/", "GET", array());
     expect($ctx->db)->toEqual("db");
+    expect($ctx->test)->toEqual("test");
   });
 
   it("Sav.setErrorHandler", function (){
