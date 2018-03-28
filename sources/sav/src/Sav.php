@@ -294,7 +294,11 @@ class Sav {
 
   public function callMethod($ctx, $method, $args) {
     if (isset($this->methodMap[$method])) {
-      return call_user_func_array($this->methodMap[$method], $args);
+      $bindName = '_'. $method;
+      if (!isset($ctx->{$bindName})) {
+        $ctx->{$bindName} = call_user_func_array($this->methodMap[$method], array($ctx));
+      }
+      return call_user_func_array($ctx->{$bindName}, $args);
     }
   }
 
