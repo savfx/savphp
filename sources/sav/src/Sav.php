@@ -20,6 +20,8 @@ class Sav {
       'baseUrl' => '',    // 项目基础URL
       'psr' => false, // 使用 psr标准加载模块
       'disableSchemaCheck' => false, // 是否禁用shcema校验
+      'disableInputSchema' => false, // 关闭输入校验 (不推荐)
+      'disableOutputSchema' => false, // 关闭输出校验
     );
     foreach ($opts as $key => $value) {
       $this->opts[$key] = $value;
@@ -233,10 +235,9 @@ class Sav {
   public function invokeCtx ($ctx) {
     $schemaCheck = !$this->opts['disableSchemaCheck'];
     $input = array();
-    if ($schemaCheck) {
-      if ($ctx->inSchema) {
-        $input = $ctx->inSchema->extract($ctx->input);
-      }
+    if ($ctx->inSchema && $schemaCheck && 
+      (!$this->opts['disableInputSchema'])) {
+      $input = $ctx->inSchema->extract($ctx->input);
     }
     ob_start();
     $output = null;
@@ -258,10 +259,9 @@ class Sav {
       throw $err;
     }
 
-    if ($schemaCheck) {
-      if ($ctx->outSchema) {
-        $output = $ctx->outSchema->check($output);
-      }
+    if ($ctx->outSchema && $schemaCheck && 
+      (!$this->opts['disableOutputSchema'])) {
+      $output = $ctx->outSchema->check($output);
     }
     $ctx->output = $output;
   }
