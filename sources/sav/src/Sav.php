@@ -38,13 +38,22 @@ class Sav
             $this->load(include_once($this->opts["contractFile"]));
         }
     }
-
+    /**
+     * 加载配置
+     * @param  array $json Contract配置
+     */
     public function load($json)
     {
         $this->router->load($json);
         $this->schema->load($json);
     }
-
+    /**
+     * 执行
+     * @param  string $uri    请求地址
+     * @param  string $method 请求方法
+     * @param  array $data    请求数据
+     * @param  boolean  $cli  是否命令行调用
+     */
     public function execute($uri = null, $method = null, $data = null, $cli = false)
     {
         if (is_null($uri)) {
@@ -87,7 +96,43 @@ class Sav
             ));
         }
     }
-
+    /**
+     * 路由解析及绑定
+     * @param  string $uri    请求地址
+     * @param  string $method 请求方法
+     * @param  array $req     请求数据
+     * @param  Context $ctx   可以给出自定义上下文
+     * @return Context        $ctx
+     */
+    public function prepare($uri, $method, $req, $ctx = null)
+    {
+        $ctx = $this->buindCtx($ctx);
+        if (($pos = strpos($uri, '?')) > 0) {
+            $uri = substr($uri, 0, $pos);
+        }
+        $uri = preg_replace('/\/+/', '/', $uri);
+        $mat = $this->matchUrl($uri, $method);
+        if ($mat) {
+          // 'inSchemaName', 'outSchemaName', 'inSchema', 'outSchema',
+          // 'class', 'instance',
+            $this->resolveRoute($mat['route'], $ctx);
+            $args = $req;
+            foreach ($mat['params'] as $key => $value) {
+                $args[$key] = $value;
+            }
+            foreach (array('path', 'route') as $key) {
+                $ctx->{$key} = $mat[$key];
+            }
+            $ctx->input = $args;
+        }
+        return $ctx;
+    }
+    /**
+     * 支持上下文
+     * @param  Context  $ctx    上下文
+     * @param  boolean $encode  是否对输出编码为字符串
+     * @throws \Exception 执行失败会抛出异常
+     */
     public function invoke($ctx, $encode = true)
     {
         try {
@@ -117,33 +162,9 @@ class Sav
         $exp->status = 404;
         throw $exp;
     }
-
-    public function prepare($uri, $method, $req, $ctx = null)
-    {
-        $ctx = $this->buindCtx($ctx);
-        if (($pos = strpos($uri, '?')) > 0) {
-            $uri = substr($uri, 0, $pos);
-        }
-        $uri = preg_replace('/\/+/', '/', $uri);
-        $mat = $this->matchUrl($uri, $method);
-        if ($mat) {
-          // 'inSchemaName', 'outSchemaName', 'inSchema', 'outSchema',
-          // 'class', 'instance',
-            $this->resolveRoute($mat['route'], $ctx);
-            $args = $req;
-            foreach ($mat['params'] as $key => $value) {
-                $args[$key] = $value;
-            }
-            foreach (array('path', 'route') as $key) {
-                $ctx->{$key} = $mat[$key];
-            }
-            $ctx->input = $args;
-        }
-        return $ctx;
-    }
     /**
      * 设置错误处理函数
-     * @param Function $handler 错误处理函数
+     * @param function $handler 错误处理函数
      */
     public function setErrorHandler($handler)
     {
@@ -151,7 +172,7 @@ class Sav
     }
     /**
      * 设置认证函数
-     * @param Function $handler 认证函数
+     * @param function $handler 认证函数
      */
     public function setAuthHandler($handler)
     {
@@ -159,8 +180,8 @@ class Sav
     }
     /**
      * 注入属性
-     * @param  String $name 属性名称
-     * @param  Function|Mixed $func 初始函数或属性值
+     * @param  string $name 属性名称
+     * @param  function|Mixed $func 初始函数或属性值
      */
     public function prop($name, $func)
     {
@@ -168,14 +189,18 @@ class Sav
     }
     /**
      * 注入方法
-     * @param  String $name 方法名称
-     * @param  Function $func 初始函数
+     * @param  string $name 方法名称
+     * @param  function $func 初始函数
      */
     public function method($name, $func)
     {
         $this->methodMap[$name] = $func;
     }
-
+    /**
+     * 获取Context属性
+     * @param  Context $ctx  上下文
+     * @param  string $name 属性名称
+     */
     public function getInstance($ctx, $name)
     {
         if (isset($this->funcMap[$name])) {
@@ -186,7 +211,12 @@ class Sav
             return $ctx->{$name} = $val;
         }
     }
-
+    /**
+     * 调用Context方法
+     * @param  Context $ctx    上下文
+     * @param  string $method 方法名称
+     * @param  array $args   参数
+     */
     public function callMethod($ctx, $method, $args)
     {
         if (isset($this->methodMap[$method])) {
