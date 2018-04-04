@@ -34,9 +34,18 @@ class Sav
         $this->authHandler = null;
         $this->funcMap = array();
         $this->methodMap = array();
+        $this->plugins = array();
         if ($this->opts["contractFile"]) {
             $this->load(include_once($this->opts["contractFile"]));
         }
+    }
+    /**
+     * 注册插件
+     * @param  function $plugin 插件注入函数
+     */
+    public function use($plugin, $opts = null)
+    {
+        array_push($this->plugins, array($plugin, $opts));
     }
     /**
      * 加载配置
@@ -124,6 +133,19 @@ class Sav
                 $ctx->{$key} = $mat[$key];
             }
             $ctx->input = $args;
+        }
+        foreach ($this->plugins as $value) {
+            list($plugin, $opts) = $value;
+            if (!is_callable($plugin) && is_string($plugin)) {
+                $pos = strpos($plugin, "::");
+                if ($pos != false) {
+                    $cls = substr($plugin, 0, $pos);
+                    if (!class_exists($cls)) {
+                        spl_autoload_call($cls);
+                    }
+                }
+            }
+            call_user_func_array($plugin, array($this, $ctx, $opts));
         }
         return $ctx;
     }
@@ -350,7 +372,7 @@ class Sav
         }
         $ctx->output = $output;
     }
-    
+
     public function matchUrl($url, $method)
     {
         if ($this->opts['baseUrl']) {

@@ -1,5 +1,6 @@
 <?php
 use Sav\Sav;
+use Sav\Spec\Plugin;
 
 describe("Sav", function () {
 
@@ -34,6 +35,33 @@ describe("Sav", function () {
             return "db";
         });
         $sav->prop("test", "test");
+        $ctx = $sav->prepare("/", "GET", array());
+        expect($ctx->db)->toEqual("db");
+        expect($ctx->test)->toEqual("test");
+    });
+
+    it("Sav.use", function () {
+        $sav = new Sav();
+        $sav->use(function ($sav, $ctx) {
+            expect($ctx->db)->toEqual(null);
+            expect($ctx->test)->toEqual(null);
+            $sav->prop("db", function () {
+                return "db";
+            });
+            $sav->prop("test", "test");
+            expect($ctx->test)->toEqual("test");
+            $sav->prop("test", "test2");
+            expect($ctx->test)->toEqual("test");
+            $sav->prop("test", null);
+        });
+        $ctx = $sav->prepare("/", "GET", array());
+        expect($ctx->db)->toEqual("db");
+        expect($ctx->test)->toEqual("test");
+    });
+
+    it("Sav.use.static", function () {
+        $sav = new Sav();
+        $sav->use("\SavSpec\Plugin::install", "arg");
         $ctx = $sav->prepare("/", "GET", array());
         expect($ctx->db)->toEqual("db");
         expect($ctx->test)->toEqual("test");
