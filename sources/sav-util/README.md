@@ -24,3 +24,64 @@ CaseConvert::snakeCase('HelloWorld');
 CaseConvert::hyphenCase('HelloWorld');
 
 ```
+
+### DateTime
+
+```php
+
+use SavUtil\DateTime;
+
+DateTime::localTime();
+DateTime::utcTime();
+DateTime::localToUtc();
+DateTime::utcToLocal();
+
+```
+
+### Request
+
+```php
+
+use SavUtil\Request;
+
+$res = Request::fetch('http://example.com');
+$res->status == 200;
+is_array($res->headers);
+is_string($res->response);
+
+Request::fetch(array(
+    'url' => 'http://example.com',
+    'data' => array(),
+    'headers' => array(),
+    'options' => array(
+        // default Options
+        'timeout' => 10,
+        'connect_timeout' => 10,
+        'useragent' => 'curl', // ua
+        'type' => 'GET', // method
+        'dataType' => '', // empty|json
+        'assoc' => true,  // json assoc array
+        'filename' => false, // save file
+        'verify' => false, // ssl verify
+        'verifyname' => false, // ssl verifyname
+    ),
+));
+
+Request::fetchAll(array(
+    "requestA" => array(
+        "url" => 'http://example.com',
+        "headers" => array(),
+        "data" => array(),
+        "options" => array(),
+    ),
+    "requestB" => array(
+        "url" => 'http://example.com',
+        "headers" => array(),
+        "data" => array(),
+        "options" => array(),
+    ),
+), array(
+    "timeout" => 20,
+));
+
+```
