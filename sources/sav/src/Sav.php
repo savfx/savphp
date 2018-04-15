@@ -122,7 +122,7 @@ class Sav
         $uri = preg_replace('/\/+/', '/', $uri);
         $mat = $this->matchUrl($uri, $method);
         if ($mat) {
-          // 'inSchemaName', 'outSchemaName', 'inSchema', 'outSchema',
+          // 'inputSchemaName', 'outputSchemaName', 'inputSchema', 'outputSchema',
           // 'class', 'instance',
             $this->resolveRoute($mat['route'], $ctx);
             $args = $req;
@@ -254,8 +254,8 @@ class Sav
     {
       // 添加 class method instance request requestSchema response responseSchema
         $this->getRouteClassMethod($route, $ret);
-        $this->getRouteSchema($route, $ret, 'request', 'in');
-        $this->getRouteSchema($route, $ret, 'response', 'out');
+        $this->getRouteSchema($route, $ret, 'request', 'input');
+        $this->getRouteSchema($route, $ret, 'response', 'output');
         $ret->instance = $this->getModalInstance($ret->className);
         return $ret;
     }
@@ -300,7 +300,7 @@ class Sav
                 }
             }
         }
-        $ret->{$name.'Name'} = $schemaName;
+        $ret->{$name.'SchemaName'} = $schemaName;
         $ret->{$name.'Schema'} = $struct;
     }
 
@@ -342,9 +342,9 @@ class Sav
     {
         $schemaCheck = !$this->opts['disableSchemaCheck'];
         $input = array();
-        if ($ctx->inSchema && $schemaCheck &&
+        if ($ctx->inputSchema && $schemaCheck &&
         (!$this->opts['disableInputSchema'])) {
-            $input = $ctx->inSchema->extract($ctx->input);
+            $input = $ctx->inputSchema->extract($ctx->input);
         }
         ob_start();
         $output = null;
@@ -366,9 +366,9 @@ class Sav
             throw $err;
         }
 
-        if ($ctx->outSchema && $schemaCheck &&
+        if ($ctx->outputSchema && $schemaCheck &&
         (!$this->opts['disableOutputSchema'])) {
-            $output = $ctx->outSchema->check($output);
+            $output = $ctx->outputSchema->check($output);
         }
         $ctx->output = $output;
     }
