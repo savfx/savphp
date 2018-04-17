@@ -16,8 +16,9 @@ class Remote
             'schemaPath' => '', // 模型目录
             'baseUrl' => '',    // 项目基础URL
             'disableSchemaCheck' => false, // 是否禁用shcema校验
-            'disableInputSchema' => false, // 关闭输入校验
+            'disableInputSchema' => true, // 关闭输入校验
             'disableOutputSchema' => false, // 关闭输出校验 (不推荐)
+            'Request' => '\\SavUtil\\Request', // 请求类
         );
         foreach ($opts as $key => $value) {
             $this->opts[$key] = $value;
@@ -28,6 +29,7 @@ class Remote
             $this->load(include_once($this->opts["contractFile"]));
         }
         $this->actions = array();
+        $this->queues = array();
     }
     /**
      * 加载配置
@@ -54,15 +56,30 @@ class Remote
     }
     public function queue($action, $data)
     {
-
+        if (is_string($action)) {
+            $action = $this->action($action);
+        }
+        $this->queues[] = array($action, $data);
+        return $this;
     }
     public function fetch($action, $data)
     {
-
+        if (is_string($action)) {
+            $action = $this->action($action);
+        }
+        // @TODO pathToRegexp.compile
     }
-    public function fetchAll($requests)
+    public function fetchAll($requests = null)
     {
-
+        if (is_array($requests)) {
+            foreach ($requests as $key => $value) {
+                $this->action($key)->queue($value);
+            }
+        }
+        // @TODO pathToRegexp.compile
+        foreach ($this->queues as $key => $value) {
+            
+        }
     }
     private function getRouteSchema($route, &$ret, $type, $name)
     {
