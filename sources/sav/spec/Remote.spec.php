@@ -4,26 +4,32 @@ use Sav\Remote;
 describe("Remote", function () {
 
     it("Remote.base", function () {
-        $sav = new Sav(array(
-            "schemaPath" => __DIR__ . '/fixtures/schemas/',
+        $remote = new Remote(array(
+            'baseUrl' => 'http://www.example.com'
         ));
-        $sav->load(array(
+        $remote->load(array(
             "modals" => array(
                 array("name" => "Account")
             ),
             "actions" => array(
-                array("name" => "login", "modal" => "Account",
-                    "request" => "ReqAccountLogin", "response" => "ResAccountLogin")
+                array("name" => "login", "modal" => "Account"),
+                array("name" => "register", "modal" => "Account"),
             ),
         ));
-        $ret = $sav->fetch("AccountLogin", array(
-            "username" => "jetiny",
-            "password" => "jetiny",
+        $ret = $remote->fetch("AccountLogin", array());
+        expect($ret->response)->toBeA("string");
+
+        $ret = $remote->fetchAll(array(
+            "AccountLogin" => array("a" => "b")
         ));
-        expect($ret)->toBeA('string');
-        expect($ret)->toEqual(json_encode(array(
-            "id" => 123,
-            "welcome" => "welcome jetiny"
-        )));
+        expect($ret)->toBeA("array");
+        expect($ret['AccountLogin']->response)->toBeA("string");
+        
+        $ret = $remote->action("AccountLogin")->queue()
+            ->action("AccountLogin")->queue()
+            ->queue("AccountLogin")
+            ->fetchAll(array("AccountLogin" => array()));
+        expect($ret)->toBeA("array");
+        expect(count($ret))->toEqual(4);
     });
 });

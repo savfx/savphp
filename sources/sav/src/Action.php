@@ -3,16 +3,16 @@ namespace Sav;
 
 class Action
 {
-    function __construct($opts, $container)
+    function __construct($route, $container)
     {
-        $this->opts = $opts;
+        $this->route = $route;
         $this->container = $container;
     }
     public function fetch($data = array())
     {
         return $this->container->fetch($this, $data);
     }
-    public function queue($opts = array())
+    public function queue($data = array())
     {
         return $this->container->queue($this, $data);
     }

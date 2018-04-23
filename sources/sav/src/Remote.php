@@ -47,27 +47,38 @@ class Remote
         }
         foreach ($this->router->getRoutes() as $route) {
             if ($route['name'] == $actionName) {
-                $action = new Action($route, $this)
+                $action = new Action($route, $this);
                 $this->getRouteSchema($route, $action, 'request', 'input');
                 $this->getRouteSchema($route, $action, 'response', 'output');
                 return $this->actions[$actionName] = $action;
             }
         }
     }
-    public function queue($action, $data)
+    public function queue($action, $data = array())
     {
         if (is_string($action)) {
             $action = $this->action($action);
         }
-        $this->queues[] = array($action, $data);
+        $name = $action->route['name'];
+        if (array_key_exists($name, $this->queues)) {
+            $this->queues[] = array($action, $data);
+        } else {
+            $this->queues[$name] = array($action, $data);
+        }
         return $this;
     }
-    public function fetch($action, $data)
+    public function fetch($action, $data = array())
     {
         if (is_string($action)) {
             $action = $this->action($action);
         }
-        // @TODO pathToRegexp.compile
+        $path = $action->route['complie']($data);
+        $url = $this->opts['baseUrl'] . $path;
+        $res = call_user_func_array($this->opts['Request'].'::fetch', array(
+            'url' => $url,
+            'data' => $data
+        ));
+        return $res;
     }
     public function fetchAll($requests = null)
     {
@@ -76,10 +87,19 @@ class Remote
                 $this->action($key)->queue($value);
             }
         }
-        // @TODO pathToRegexp.compile
-        foreach ($this->queues as $key => $value) {
-            
+        $args = array();
+        foreach ($this->queues as $index => $arr) {
+            list($action, $data) = $arr;
+            $path = $action->route['complie']($data);
+            $url = $this->opts['baseUrl'] . $path;
+            $args[$index] = array(
+                'url' => $url,
+                'data' => $data
+            );
         }
+        $this->queues = [];
+        $res = call_user_func_array($this->opts['Request'].'::fetchAll', array($args));
+        return $res;
     }
     private function getRouteSchema($route, &$ret, $type, $name)
     {
