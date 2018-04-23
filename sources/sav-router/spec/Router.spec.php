@@ -14,14 +14,14 @@ describe("Router", function () {
     });
 
     it('stripPrefix', function () {
-        expect(SavRouter\stripPrefix('', ''))->toEqual('');
-        expect(SavRouter\stripPrefix('/', ''))->toEqual('/');
-        expect(SavRouter\stripPrefix('/a', '/a'))->toEqual('/');
-        expect(SavRouter\stripPrefix('/a/', '/a'))->toEqual('/');
-        expect(SavRouter\stripPrefix('/a/b', '/a'))->toEqual('/b');
+        expect(Router::stripPrefix('', ''))->toEqual('');
+        expect(Router::stripPrefix('/', ''))->toEqual('/');
+        expect(Router::stripPrefix('/a', '/a'))->toEqual('/');
+        expect(Router::stripPrefix('/a/', '/a'))->toEqual('/');
+        expect(Router::stripPrefix('/a/b', '/a'))->toEqual('/b');
 
-        expect(SavRouter\stripPrefix('/a/', '/a/'))->toEqual('/');
-        expect(SavRouter\stripPrefix('/a/b', '/a/'))->toEqual('/b');
+        expect(Router::stripPrefix('/a/', '/a/'))->toEqual('/');
+        expect(Router::stripPrefix('/a/b', '/a/'))->toEqual('/b');
     });
 
     it("Router.basic", function () {
@@ -32,23 +32,21 @@ describe("Router", function () {
         'sensitive' => true,
         ));
         $router->load(array("modals" => array(
-        "Home" =>
-        array("routes" => array(
-            "default" => array(),
-            "relative" => array("path" => 'relativeRoute'),
-            "absolute" => array("path" => '/absoluteRoute'),
-            "user" => array("path" => 'user/:id')
-          )
-        ),
-        "Article" =>
-        array("path" => 'art',
-          "routes" => array(
-            "list" => array(),
-            "cat" => array("path" => '/article/cat/:id'),
-            "item" => array("path" => 'item/:id')
-          )
-        )
-        )
+            "Home" => array("routes" => array(
+                    "default" => array(),
+                    "relative" => array("path" => 'relativeRoute'),
+                    "absolute" => array("path" => '/absoluteRoute'),
+                    "user" => array("path" => 'user/:id')
+                  )
+                ),
+            "Article" => array("path" => 'art',
+                  "routes" => array(
+                    "list" => array(),
+                    "cat" => array("path" => '/article/cat/:id'),
+                    "item" => array("path" => 'item/:id')
+                  )
+                )
+            )
         ));
         $pathEqual = function ($path, $end = false) use ($router) {
             $ret = $router->matchRoute($path, 'GET');
@@ -74,18 +72,18 @@ describe("Router", function () {
 
     it("Router.sensitive", function () {
         $router = new Router(array(
-        'caseType' => 'hyphen',
-        'method' => 'GET',
-        'sensitive' => false,
+            'caseType' => 'hyphen',
+            'method' => 'GET',
+            'sensitive' => false,
         ));
         $router->load(array("modals" => array(
-        "UserProfile" =>
-        array("routes" => array(
-            "HomeInfo" => array(),
-            "UserAddress" => array("path" => 'UserAddress'),
-          )
-        ),
-        )
+            "UserProfile" =>
+                array("routes" => array(
+                    "HomeInfo" => array(),
+                    "UserAddress" => array("path" => 'UserAddress'),
+                  )
+                ),
+            )
         ));
         expect($router->matchRoute('/user-profile/home-info', 'GET'))->toBeA('array');
         expect($router->matchRoute('/user-PROFILE/HOME-info/', 'GET'))->toBeA('array');
@@ -97,19 +95,19 @@ describe("Router", function () {
 
     it("Router.load", function () {
         $router = new Router(array(
-        'caseType' => 'hyphen',
-        'method' => 'GET',
-        'sensitive' => false,
+            'caseType' => 'hyphen',
+            'method' => 'GET',
+            'sensitive' => false,
         ));
         $router->load(array(
-        "modals" => array(
-        array("id" => 1, "name" => "UserProfile", "routes" => array(
-          array("name" => "UserAddress")
-        ))
-        ),
-        "actions" => array(
-        array("name" => "HomeInfo", "modal" => 1),
-        ),
+            "modals" => array(
+                array("id" => 1, "name" => "UserProfile", "routes" => array(
+                  array("name" => "UserAddress")
+                ))
+            ),
+            "actions" => array(
+                array("name" => "HomeInfo", "modal" => 1),
+            ),
         ));
         expect($router->matchRoute('/user-profile/home-info', 'GET'))->toBeA('array');
         expect($router->matchRoute('/user-PROFILE/HOME-info/', 'GET'))->toBeA('array');
