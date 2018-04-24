@@ -74,16 +74,20 @@ class Remote
             $action = $this->action($action);
         }
         if ((!$this->opts['disableInputCheck']) && ($action->inputSchema)) {
-            $action->inputSchema->extract($data);
+            $data = $action->inputSchema->extract($data);
         }
         $path = $action->route['complie']($data);
         $url = $this->opts['baseUrl'] . $path;
-        $res = call_user_func_array($this->opts['Request'].'::fetch', array(
-            'url' => $url,
-            'data' => $data
-        ));
+        $args = array('url' => $url, 'data' => $data);
+        if ($this->container) {
+            $args = $this->container->handleRemoteRequest($args, $action, $this);
+        }
+        $res = call_user_func_array($this->opts['Request'].'::fetch', $args);
         if ((!$this->opts['disableOutputCheck']) && ($action->outputSchema)) {
             $res->response = $action->outputSchema->check($res->response);
+        }
+        if ($this->container) {
+            return $this->container->handleRemoteResponse($res, $action, $this);
         }
         return $res;
     }
@@ -96,7 +100,7 @@ class Remote
         }
         $queues = $this->queues;
         $this->queues = [];
-        $args = array();
+        $argv = array();
         foreach ($queues as $index => $arr) {
             list($action, $data) = $arr;
             if ((!$this->opts['disableInputCheck']) && ($action->inputSchema)) {
@@ -104,16 +108,20 @@ class Remote
             }
             $path = $action->route['complie']($data);
             $url = $this->opts['baseUrl'] . $path;
-            $args[$index] = array(
-                'url' => $url,
-                'data' => $data
-            );
+            $args = array('url' => $url, 'data' => $data);
+            if ($this->container) {
+                $args = $this->container->handleRemoteRequest($args, $action, $this);
+            }
+            $argv[$index] = $args;
         }
-        $res = call_user_func_array($this->opts['Request'].'::fetchAll', array($args));
+        $res = call_user_func_array($this->opts['Request'].'::fetchAll', array($argv));
         foreach ($res as $index => &$item) {
             $action = $queues[$index][0];
             if ((!$this->opts['disableOutputCheck']) && ($action->outputSchema)) {
                 $item->response = $action->outputSchema->check($item->response);
+            }
+            if ($this->container) {
+                $item = $this->container->handleRemoteResponse($item, $action, $this);
             }
         }
         return $res;

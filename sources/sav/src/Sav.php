@@ -38,6 +38,8 @@ class Sav
         $this->methodMap = array();
         $this->plugins = array();
         $this->remotes = array();
+        $this->remoteRequestHandler = null;
+        $this->remoteResponseHandler = null;
         if ($this->opts["contractFile"]) {
             $this->load(include_once($this->opts["contractFile"]));
         }
@@ -394,5 +396,33 @@ class Sav
             return $this->remotes[$name] = $remote;
         }
         return $this->remotes[$name];
+    }
+    public function setRemoteRequestHandler($handler)
+    {
+        $this->remoteRequestHandler = $handler;
+    }
+    public function setRemoteResponseHandler($handler)
+    {
+        $this->remoteResponseHandler = $handler;
+    }
+    public function handleRemoteRequest($request, $action, $remote)
+    {
+        if ($this->remoteRequestHandler) {
+            return call_user_func_array(
+                $this->remoteRequestHandler,
+                array($request, $action, $remote)
+            );
+        }
+        return $request;
+    }
+    public function handleRemoteResponse($response, $action, $remote)
+    {
+        if ($this->remoteResponseHandler) {
+            return call_user_func_array(
+                $this->remoteResponseHandler,
+                array($response, $action, $remote)
+            );
+        }
+        return $response;
     }
 }
