@@ -6,6 +6,7 @@ use SavRouter\Router;
 use SavSchema\Schema;
 use SavUtil\CaseConvert;
 use Sav\Context;
+use Sav\Remote;
 
 class Sav
 {
@@ -21,9 +22,10 @@ class Sav
             'classSuffix' => '', // 模块名称后缀
             'baseUrl' => '',    // 项目基础URL
             'psr' => false, // 使用 psr标准加载模块
-            'disableSchemaCheck' => false, // 是否禁用shcema校验
-            'disableInputSchema' => false, // 关闭输入校验 (不推荐)
-            'disableOutputSchema' => false, // 关闭输出校验
+            'disableInputCheck' => false, // 关闭输入校验 (不推荐)
+            'disableOutputCheck' => false, // 关闭输出校验
+            'remotes' => array(), // 远端列表
+            'remoteOptions' => array(), // 远端配置
         );
         foreach ($opts as $key => $value) {
             $this->opts[$key] = $value;
@@ -35,6 +37,7 @@ class Sav
         $this->funcMap = array();
         $this->methodMap = array();
         $this->plugins = array();
+        $this->remotes = array();
         if ($this->opts["contractFile"]) {
             $this->load(include_once($this->opts["contractFile"]));
         }
@@ -340,10 +343,8 @@ class Sav
 
     private function invokeCtx($ctx)
     {
-        $schemaCheck = !$this->opts['disableSchemaCheck'];
         $input = array();
-        if ($ctx->inputSchema && $schemaCheck &&
-        (!$this->opts['disableInputSchema'])) {
+        if ($ctx->inputSchema && (!$this->opts['disableInputCheck'])) {
             $input = $ctx->inputSchema->extract($ctx->input);
         }
         ob_start();
@@ -365,9 +366,7 @@ class Sav
         if ($err) {
             throw $err;
         }
-
-        if ($ctx->outputSchema && $schemaCheck &&
-        (!$this->opts['disableOutputSchema'])) {
+        if ($ctx->outputSchema && (!$this->opts['disableOutputCheck'])) {
             $output = $ctx->outputSchema->check($output);
         }
         $ctx->output = $output;
@@ -385,5 +384,15 @@ class Sav
         }
         $method = strtoupper($method);
         return $this->router->matchRoute($url, $method);
+    }
+    public function remote($name)
+    {
+        if (!isset($this->remotes[$name])) {
+            $opt = $this->opts['remotes'][$name];
+            $opt = array_merge($this->opts['remoteOptions'], $opt);
+            $remote = new Remote($opt, $this);
+            return $this->remotes[$name] = $remote;
+        }
+        return $this->remotes[$name];
     }
 }

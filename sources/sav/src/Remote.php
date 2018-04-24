@@ -9,20 +9,20 @@ use Sav\Action;
 
 class Remote
 {
-    function __construct($opts = array())
+    function __construct($opts = array(), $container = null)
     {
         $this->opts = array(
             'contractFile' => null, // 合约文件
             'schemaPath' => '', // 模型目录
             'baseUrl' => '',    // 项目基础URL
-            'disableSchemaCheck' => false, // 是否禁用shcema校验
-            'disableInputSchema' => true, // 关闭输入校验
-            'disableOutputSchema' => false, // 关闭输出校验 (不推荐)
+            'disableInputCheck' => true, // 关闭输入校验
+            'disableOutputCheck' => false, // 关闭输出校验 (不推荐)
             'Request' => '\\SavUtil\\Request', // 请求类
         );
         foreach ($opts as $key => $value) {
             $this->opts[$key] = $value;
         }
+        $this->container = $container;
         $this->router = new Router($opts);
         $this->schema = new Schema($opts);
         if ($this->opts["contractFile"]) {
@@ -45,6 +45,7 @@ class Remote
         if (isset($this->actions[$actionName])) {
             return $this->actions[$actionName];
         }
+        // @TODO 不使用大的contract
         foreach ($this->router->getRoutes() as $route) {
             if ($route['name'] == $actionName) {
                 $action = new Action($route, $this);
@@ -72,12 +73,18 @@ class Remote
         if (is_string($action)) {
             $action = $this->action($action);
         }
+        if ((!$this->opts['disableInputCheck']) && ($action->inputSchema)) {
+            $action->inputSchema->extract($data);
+        }
         $path = $action->route['complie']($data);
         $url = $this->opts['baseUrl'] . $path;
         $res = call_user_func_array($this->opts['Request'].'::fetch', array(
             'url' => $url,
             'data' => $data
         ));
+        if ((!$this->opts['disableOutputCheck']) && ($action->outputSchema)) {
+            $res->response = $action->outputSchema->check($res->response);
+        }
         return $res;
     }
     public function fetchAll($requests = null)
@@ -87,9 +94,14 @@ class Remote
                 $this->action($key)->queue($value);
             }
         }
+        $queues = $this->queues;
+        $this->queues = [];
         $args = array();
-        foreach ($this->queues as $index => $arr) {
+        foreach ($queues as $index => $arr) {
             list($action, $data) = $arr;
+            if ((!$this->opts['disableInputCheck']) && ($action->inputSchema)) {
+                $data = $action->inputSchema->extract($data);
+            }
             $path = $action->route['complie']($data);
             $url = $this->opts['baseUrl'] . $path;
             $args[$index] = array(
@@ -97,8 +109,13 @@ class Remote
                 'data' => $data
             );
         }
-        $this->queues = [];
         $res = call_user_func_array($this->opts['Request'].'::fetchAll', array($args));
+        foreach ($res as $index => &$item) {
+            $action = $queues[$index][0];
+            if ((!$this->opts['disableOutputCheck']) && ($action->outputSchema)) {
+                $item->response = $action->outputSchema->check($item->response);
+            }
+        }
         return $res;
     }
     private function getRouteSchema($route, &$ret, $type, $name)

@@ -101,4 +101,24 @@ describe("Sav", function () {
         })->toThrow();
     });
 
+    it("Sav.remote", function () {
+        $sav = new Sav(array(
+            'remotes' => array(
+                "example" => array(
+                    'baseUrl' => 'http://example.com'
+                )
+            )
+        ));
+        $sav->remote('example')->load(array(
+            "modals" => array(
+                array("name" => "Account")
+            ),
+            "actions" => array(
+                array("name" => "login", "modal" => "Account")
+            ),
+        ));
+        $res = $sav->remote('example')->fetch('AccountLogin');
+        expect($res)->toBeA('object');
+    });
+
 });

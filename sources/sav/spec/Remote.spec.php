@@ -16,6 +16,10 @@ describe("Remote", function () {
                 array("name" => "register", "modal" => "Account"),
             ),
         ));
+
+        $ret = $remote->action("AccountLogin")->fetch();
+        expect($ret->response)->toBeA("string");
+
         $ret = $remote->fetch("AccountLogin", array());
         expect($ret->response)->toBeA("string");
 
@@ -24,7 +28,7 @@ describe("Remote", function () {
         ));
         expect($ret)->toBeA("array");
         expect($ret['AccountLogin']->response)->toBeA("string");
-        
+
         $ret = $remote->action("AccountLogin")->queue()
             ->action("AccountLogin")->queue()
             ->queue("AccountLogin")
