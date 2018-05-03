@@ -43,7 +43,8 @@ describe("Router", function () {
                   "routes" => array(
                     "list" => array(),
                     "cat" => array("path" => '/article/cat/:id'),
-                    "item" => array("path" => 'item/:id')
+                    "item" => array("path" => 'item/:id'),
+                    "index" => array("path" => '')
                   )
                 )
             )
@@ -67,6 +68,8 @@ describe("Router", function () {
         $pathEqual('/absoluteRoute/', true);
         $pathEqual('/home/user/1', '/home/user/:id');
         $pathEqual('/home/user/1/', '/home/user/:id');
+        $pathEqual('/art/', '/art');
+        $pathEqual('/art');
 
     });
 

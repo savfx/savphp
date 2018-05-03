@@ -103,11 +103,16 @@ class Router
         if ($path && $path[0] === '/') {
             $isAbsolute = true;
         } else {
-            $path = $modal['path'] . '/' . ($path ? $path : $route['path']);
+            $path = $modal['path'] . '/' . (is_null($path) ? $route['path'] : $path);
         }
-        $route['path'] = $this->normalPath($path);
+        $path = $this->normalPath($path);
+        if ($path[strlen($path) -1] == "/") {
+            $path = substr($path, 0, strlen($path) -1);
+        }
+        $route['path'] = $path;
         $parsed = PathRoute::parse($route['path'], array(
             "sensitive" => $this->opts['sensitive'],
+            "strict" => false,
             "end" => true
         ));
         $route['regexp'] = $parsed['regexp'];
