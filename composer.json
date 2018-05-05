@@ -10,6 +10,7 @@
     ],
     "scripts": {
         "test": "kahlan --config=kahlan.config.php --clover=clover.xml",
+        "covd": "kahlan --config=kahlan.config.php --cov=4",
         "fix": "phpcbf",
         "lint": "phpcs"
     },

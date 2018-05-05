@@ -16,7 +16,7 @@ $commandLine->option('spec', 'default', array(
     'sources/sav-router/spec',
     'sources/sav-schema/spec',
 ));
-$commandLine->option('coverage', 'default', 1);
+$commandLine->option('cov', 'default', 1);
 
 Filters::apply($this, 'coverage', function($next) {
     if (!extension_loaded('xdebug')) {
@@ -24,7 +24,7 @@ Filters::apply($this, 'coverage', function($next) {
     }
     $reporters = $this->reporters();
     $coverage = new Coverage([
-        'verbosity' => $this->commandLine()->get('coverage'),
+        'verbosity' => $this->commandLine()->get('cov'),
         'driver'    => new Xdebug(),
         'path'      => $this->commandLine()->get('src'),
         'exclude'   => [
@@ -35,7 +35,7 @@ Filters::apply($this, 'coverage', function($next) {
 });
 
 Filters::apply($this, 'reporting', function($next) {
-    $reporter = $this->reporters()->get('coverage');
+    $reporter = $this->reporters()->get('cov');
     if (!$reporter) {
         return;
     }
