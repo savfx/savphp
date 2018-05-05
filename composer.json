@@ -27,5 +27,13 @@
     },
     "require-dev": {
         "kahlan/kahlan": "^4.0"
+    },
+    "archive": {
+        "exclude": [
+            "sources/sav-util/spec/**",
+            "sources/sav-router/spec/*",
+            "sources/sav-schema/spec/*.php",
+            "sources/sav/spec"
+        ]
     }
 }
