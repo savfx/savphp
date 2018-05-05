@@ -10,11 +10,13 @@ $commandLine->option('src', 'default', array(
     'sources/sav-util/src',
     'sources/sav-router/src',
     'sources/sav-schema/src',
+    'sources/sav/src',
 ));
 $commandLine->option('spec', 'default', array(
     'sources/sav-util/spec',
     'sources/sav-router/spec',
     'sources/sav-schema/spec',
+    'sources/sav/spec',
 ));
 $commandLine->option('cov', 'default', 1);
 

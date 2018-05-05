@@ -30,10 +30,13 @@
     <file>sources/sav-router/spec</file>
     <file>sources/sav-schema/src</file>
     <file>sources/sav-schema/spec</file>
+    <file>sources/sav/spec</file>
+    <file>sources/sav/spec</file>
 
     <exclude-pattern>sources/sav-util/spec/fixtures/*</exclude-pattern>
     <exclude-pattern>sources/sav-router/spec/fixtures/*</exclude-pattern>
     <exclude-pattern>sources/sav-schema/spec/fixtures/*</exclude-pattern>
+    <exclude-pattern>sources/sav/spec/fixtures/*</exclude-pattern>
     <exclude-pattern>vendor/*</exclude-pattern>
 
 </ruleset>

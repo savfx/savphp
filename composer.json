@@ -16,6 +16,7 @@
     },
     "autoload":{
         "psr-4":{
+            "Sav\\": "sources/sav/src/",
             "SavUtil\\": "sources/sav-util/src/",
             "SavRouter\\": "sources/sav-router/src/",
             "SavSchema\\": "sources/sav-schema/src/"

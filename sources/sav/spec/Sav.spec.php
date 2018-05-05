@@ -60,6 +60,11 @@ describe("Sav", function () {
     });
 
     it("Sav.use.static", function () {
+        spl_autoload_register(function ($cls) {
+            if (strpos($cls, "SavSpec\Plugin") !== false) {
+                require_once(__DIR__ . "/Plugin.php");
+            }
+        });
         $sav = new Sav();
         $sav->use("\SavSpec\Plugin::install", "arg");
         $ctx = $sav->prepare("/", "GET", array());
