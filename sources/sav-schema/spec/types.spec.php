@@ -1,6 +1,6 @@
 <?php
 
-require_once "./src/types.php";
+require_once __DIR__ . "/../src/types.php";
 
 function is_assoc($arr)
 {

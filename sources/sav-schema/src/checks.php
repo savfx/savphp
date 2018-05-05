@@ -64,18 +64,18 @@ function nre($value, $argv)
 function registerChecks($schema)
 {
     $checks = array(
-    array("name" => 'gt', "alias" => '>', "check" => "SavSchema\\gt"),
-    array("name" => 'gte', "alias" => '>=', "check" => "SavSchema\\gte"),
-    array("name" => 'lt', "alias" => '<', "check" => "SavSchema\\lt"),
-    array("name" => 'lte', "alias" => '<=', "check" => "SavSchema\\lte"),
-    array("name" => 'in', "check" => "SavSchema\\inArray"),
-    array("name" => 'nin', "check" => "SavSchema\\nin"),
-    array("name" => 'lgt', "check" => "SavSchema\\lgt"),
-    array("name" => 'lgte', "check" => "SavSchema\\lgte"),
-    array("name" => 'llt', "check" => "SavSchema\\llt"),
-    array("name" => 'llte', "check" => "SavSchema\\llte"),
-    array("name" => 're', "check" => "SavSchema\\re"),
-    array("name" => 'nre', "check" => "SavSchema\\nre")
+        array("name" => 'gt', "alias" => '>', "check" => "SavSchema\\gt"),
+        array("name" => 'gte', "alias" => '>=', "check" => "SavSchema\\gte"),
+        array("name" => 'lt', "alias" => '<', "check" => "SavSchema\\lt"),
+        array("name" => 'lte', "alias" => '<=', "check" => "SavSchema\\lte"),
+        array("name" => 'in', "check" => "SavSchema\\inArray"),
+        array("name" => 'nin', "check" => "SavSchema\\nin"),
+        array("name" => 'lgt', "check" => "SavSchema\\lgt"),
+        array("name" => 'lgte', "check" => "SavSchema\\lgte"),
+        array("name" => 'llt', "check" => "SavSchema\\llt"),
+        array("name" => 'llte', "check" => "SavSchema\\llte"),
+        array("name" => 're', "check" => "SavSchema\\re"),
+        array("name" => 'nre', "check" => "SavSchema\\nre")
     );
     foreach ($checks as $it) {
         $schema->registerCheck($it);

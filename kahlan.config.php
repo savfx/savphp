@@ -6,7 +6,17 @@ use Kahlan\Reporter\Coverage\Exporter\Coveralls;
 use Kahlan\Reporter\Coverage\Exporter\CodeClimate;
 
 $commandLine = $this->commandLine();
-$commandLine->option('coverage', 'default', 4);
+$commandLine->option('src', 'default', array(
+    'sources/sav-util/src',
+    'sources/sav-router/src',
+    'sources/sav-schema/src',
+));
+$commandLine->option('spec', 'default', array(
+    'sources/sav-util/spec',
+    'sources/sav-router/spec',
+    'sources/sav-schema/spec',
+));
+$commandLine->option('coverage', 'default', 1);
 
 Filters::apply($this, 'coverage', function($next) {
     if (!extension_loaded('xdebug')) {
@@ -39,7 +49,7 @@ Filters::apply($this, 'reporting', function($next) {
         'collector'  => $reporter,
         'file'       => 'codeclimate.json',
         'branch'     => getenv('TRAVIS_BRANCH') ?: null,
-        'repo_token' => 'ea69f0fe331158fc8104971b9e256e5d5cc017177dbd4e7dfe3299a6cbb46b09'
+        'repo_token' => ''
     ]);
     return $next();
 });

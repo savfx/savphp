@@ -1,7 +1,6 @@
 <?php
 namespace SavSchema;
 
-require_once __DIR__."/consts.php";
 require_once __DIR__."/types.php";
 require_once __DIR__."/checks.php";
 
@@ -46,7 +45,7 @@ class Schema
     public function registerType($opts)
     {
         $ret = new SchemaType($this, $opts);
-        $ret->schemaType = SAV_SCHEMA_TYPE;
+        $ret->schemaType = static::$SAV_SCHEMA_TYPE;
         exportSchema($this, $ret);
         return $ret;
     }
@@ -77,11 +76,11 @@ class Schema
     public function getRef($ret)
     {
         switch ($ret->schemaType) {
-            case SAV_SCHEMA_REFER:
+            case static::$SAV_SCHEMA_REFER:
                 return $this->{$ret->refer};
-            case SAV_SCHEMA_LIST:
+            case static::$SAV_SCHEMA_LIST:
                 return $this->{$ret->list};
-            case SAV_SCHEMA_FIELD:
+            case static::$SAV_SCHEMA_FIELD:
                 return $this->{$ret->type};
         }
     }
@@ -94,6 +93,12 @@ class Schema
             return $this->nameMap[$_property];
         }
     }
+    public static $SAV_SCHEMA_TYPE = 1;
+    public static $SAV_SCHEMA_ENUM = 2;
+    public static $SAV_SCHEMA_STURCT = 3;
+    public static $SAV_SCHEMA_LIST = 4;
+    public static $SAV_SCHEMA_REFER = 5;
+    public static $SAV_SCHEMA_FIELD = 6;
 }
 
 function createSchema($schema, $data, $opts)
@@ -130,25 +135,25 @@ function createSchema($schema, $data, $opts)
                 $field = $schema->idMap[$it];
             } else {
                 $field = new SchemaField($schema, $it);
-                $field->schemaType = SAV_SCHEMA_FIELD;
+                $field->schemaType = Schema::$SAV_SCHEMA_FIELD;
             }
             array_push($fields, $field);
         }
         $ret = new SchemaStruct($schema, $data);
-        $ret->schemaType = SAV_SCHEMA_STURCT;
+        $ret->schemaType = Schema::$SAV_SCHEMA_STURCT;
         $ret->fields = $fields;
     } elseif (isset($data['refer'])) {
         $ret = new SchemaRefer($schema, $data);
-        $ret->schemaType = SAV_SCHEMA_REFER;
+        $ret->schemaType = Schema::$SAV_SCHEMA_REFER;
     } elseif (isset($data['list'])) {
         $ret = new SchemaList($schema, $data);
-        $ret->schemaType = SAV_SCHEMA_LIST;
+        $ret->schemaType = Schema::$SAV_SCHEMA_LIST;
     } elseif (isset($data['enums'])) {
         $ret = new SchemaEnum($schema, $data);
-        $ret->schemaType = SAV_SCHEMA_ENUM;
+        $ret->schemaType = Schema::$SAV_SCHEMA_ENUM;
     } elseif (isset($data['type'])) {
         $ret = new SchemaField($schema, $data);
-        $ret->schemaType = SAV_SCHEMA_FIELD;
+        $ret->schemaType = Schema::$SAV_SCHEMA_FIELD;
     }
     exportSchema($schema, $ret);
     return $ret;
@@ -161,7 +166,7 @@ function createFields($schema, $fields, $opts)
             $value['id'] = $key;
         }
         $ret = new SchemaField($schema, $value);
-        $ret->schemaType = SAV_SCHEMA_FIELD;
+        $ret->schemaType = Schema::$SAV_SCHEMA_FIELD;
         exportSchema($schema, $ret);
     }
 }
@@ -171,7 +176,7 @@ function exportSchema($schema, $ref)
     if (!is_null($ref->id)) {
         $schema->idMap[$ref->id] = $ref;
     }
-    if (($ref->schemaType != SAV_SCHEMA_FIELD) && $ref->name) {
+    if (($ref->schemaType != Schema::$SAV_SCHEMA_FIELD) && $ref->name) {
         $schema->nameMap[$ref->name] = $ref;
     }
 }

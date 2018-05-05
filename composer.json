@@ -1,5 +1,5 @@
 {
-    "name": "savphp/sav-util",
+    "name": "savfx/savphp",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -9,13 +9,15 @@
         }
     ],
     "scripts": {
-        "test": "kahlan",
-        "cov": "kahlan --coverage=3",
-        "covd": "kahlan --coverage=4"
+        "test": "kahlan --config=kahlan.config.php --clover=clover.xml",
+        "fix": "phpcbf",
+        "lint": "phpcs"
     },
     "autoload":{
         "psr-4":{
-            "SavUtil\\": "src/"
+            "SavUtil\\": "sources/sav-util/src/",
+            "SavRouter\\": "sources/sav-router/src/",
+            "SavSchema\\": "sources/sav-schema/src/"
         }
     },
     "require": {

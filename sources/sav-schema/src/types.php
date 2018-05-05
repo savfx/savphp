@@ -145,65 +145,65 @@ function isArray($val)
 function registerTypes($schema)
 {
     $types = array(
-    array(
-      "name" => "String",
-      "check" => "is_string",
-      "parse" => "SavSchema\\stringVal",
-      "default" => ""
-    ),
-    array(
-      "name" => "Number",
-      "check" => "is_numeric",
-      "parse" => "SavSchema\\numberVal",
-      "default" => 0
-    ),
-    array(
-      "name" => "Boolean",
-      "check" => "is_bool",
-      "parse" => "SavSchema\\booleanVal",
-      "default" => false
-    ),
-    array(
-      "name" => "Array",
-      "check" => "SavSchema\\isArray",
-      "parse" => "SavSchema\\arrayVal",
-      "default" => function () {
-        return [];
-      }
-    ),
-    array(
-      "name" => "Object",
-      "check" => "SavSchema\\isObject",
-      "parse" => "SavSchema\\objectVal",
-      "default" => function () {
-        return new \stdClass;
-      }
-    )
+        array(
+          "name" => "String",
+          "check" => "is_string",
+          "parse" => "SavSchema\\stringVal",
+          "default" => ""
+        ),
+        array(
+          "name" => "Number",
+          "check" => "is_numeric",
+          "parse" => "SavSchema\\numberVal",
+          "default" => 0
+        ),
+        array(
+          "name" => "Boolean",
+          "check" => "is_bool",
+          "parse" => "SavSchema\\booleanVal",
+          "default" => false
+        ),
+        array(
+          "name" => "Array",
+          "check" => "SavSchema\\isArray",
+          "parse" => "SavSchema\\arrayVal",
+          "default" => function () {
+            return [];
+          }
+        ),
+        array(
+          "name" => "Object",
+          "check" => "SavSchema\\isObject",
+          "parse" => "SavSchema\\objectVal",
+          "default" => function () {
+            return new \stdClass;
+          }
+        )
     );
 
     $rangs = array(
-    "Int8" => array(-128, 127),
-    "UInt8" => array(0, 255),
-    "Byte" => array(-128, 255),
-    "Int16" => array(-32768, 32767),
-    "UInt16" => array(0, 65535),
-    "Short" => array(-32768, 65535),
-    "Int32" => array(-2147483648, 2147483647),
-    "UInt32" => array(0, 4294967295),
-    "Integer" => array(-2147483648, 4294967295),
-    "Long" => array(-9007199254740991, 9007199254740991)
+        "Int8" => array(-128, 127),
+        "UInt8" => array(0, 255),
+        "Byte" => array(-128, 255),
+        "Int16" => array(-32768, 32767),
+        "UInt16" => array(0, 65535),
+        "Short" => array(-32768, 65535),
+        "Int32" => array(-2147483648, 2147483647),
+        "UInt32" => array(0, 4294967295),
+        "Integer" => array(-2147483648, 4294967295),
+        "Long" => array(-9007199254740991, 9007199254740991)
     );
 
     foreach ($rangs as $key => &$value) {
         array_push($types, array(
-        "name" => $key,
-        "default" => 0,
-        "check" => function ($val) use ($value) {
-            return isNatural($val) && $val >= $value[0] && $val <= $value[1];
-        },
-        "parse" => "SavSchema\\numberVal",
-        "min" => $value[0],
-        "max" => $value[1]
+            "name" => $key,
+            "default" => 0,
+            "check" => function ($val) use ($value) {
+                return isNatural($val) && $val >= $value[0] && $val <= $value[1];
+            },
+            "parse" => "SavSchema\\numberVal",
+            "min" => $value[0],
+            "max" => $value[1]
         ));
     }
     foreach ($types as $value) {

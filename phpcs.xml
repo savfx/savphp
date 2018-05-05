@@ -7,6 +7,7 @@
 
     <rule ref="PSR2">
         <exclude name="Squiz.Scope.MethodScope.Missing"/>
+        <exclude name="Squiz.Functions.FunctionDeclaration.Found"/>
         <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
         <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose"/>
         <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody"/>
@@ -23,11 +24,16 @@
             <property name="absoluteLineLimit" value="0"/>
         </properties>
     </rule>
-    <file>src</file>
-    <file>spec</file>
+    <file>sources/sav-util/src</file>
+    <file>sources/sav-util/spec</file>
+    <file>sources/sav-router/src</file>
+    <file>sources/sav-router/spec</file>
+    <file>sources/sav-schema/src</file>
+    <file>sources/sav-schema/spec</file>
 
-    <exclude-pattern>spec/fixtures/*</exclude-pattern>
-    <exclude-pattern>spec/Fixture/*</exclude-pattern>
+    <exclude-pattern>sources/sav-util/spec/fixtures/*</exclude-pattern>
+    <exclude-pattern>sources/sav-router/spec/fixtures/*</exclude-pattern>
+    <exclude-pattern>sources/sav-schema/spec/fixtures/*</exclude-pattern>
     <exclude-pattern>vendor/*</exclude-pattern>
 
 </ruleset>

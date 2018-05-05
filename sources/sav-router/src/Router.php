@@ -1,7 +1,7 @@
 <?php
 namespace SavRouter;
 
-use PathRoute\PathRoute;
+use SavRouter\Route;
 use SavUtil\CaseConvert;
 
 class Router
@@ -61,7 +61,7 @@ class Router
         );
         $path = (isset($opts['path']) && is_string($opts['path'])) ? $opts['path'] : $route['path'];
         $route['path'] = $this->normalPath('/' . $path);
-        $route['regexp'] = PathRoute::parse($route['path'], array(
+        $route['regexp'] = Route::parse($route['path'], array(
             "sensitive" => $this->opts['sensitive'],
             "end" => false))['regexp'];
         $this->modalMap[$opts['name']] = &$route;
@@ -110,14 +110,14 @@ class Router
             $path = substr($path, 0, strlen($path) -1);
         }
         $route['path'] = $path;
-        $parsed = PathRoute::parse($route['path'], array(
+        $parsed = Route::parse($route['path'], array(
             "sensitive" => $this->opts['sensitive'],
             "strict" => false,
             "end" => true
         ));
         $route['regexp'] = $parsed['regexp'];
         $route['keys'] = $parsed['keys'];
-        $route['complie'] = PathRoute::complie($parsed['tokens']);
+        $route['complie'] = Route::complie($parsed['tokens']);
         $route['isAbsolute'] = $isAbsolute;
         if ($isAbsolute) {
             $this->absoluteRoutes[$method][] = &$route;
@@ -157,7 +157,7 @@ class Router
     }
     private function matchRouteItem($route, $path, &$ret)
     {
-        $params = PathRoute::match($route, $path);
+        $params = Route::match($route, $path);
         if (is_array($params)) {
             $ret['params'] = $params;
             $ret['route'] = $route;
