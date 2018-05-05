@@ -213,7 +213,7 @@ class Request
             list($key, $value) = explode(':', $header, 2);
             $value = trim($value);
             preg_replace('#(\s+)#i', ' ', $value);
-            $ret->headers[$key] = $value;
+            $ret->headers[strtolower($key)] = $value;
         }
         $ret->response = $this->response_data;
         if ($this->options['dataType'] === 'json') {
