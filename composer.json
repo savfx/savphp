@@ -17,6 +17,7 @@
     "autoload":{
         "psr-4":{
             "Sav\\": "sources/sav/src/",
+            "SavLumenApp\\": "sources/sav-lumen-app/src/",
             "SavUtil\\": "sources/sav-util/src/",
             "SavRouter\\": "sources/sav-router/src/",
             "SavSchema\\": "sources/sav-schema/src/"
@@ -32,7 +33,8 @@
         "exclude": [
             "sources/sav-util/spec/**",
             "sources/sav-router/spec/*",
-            "sources/sav-schema/spec/*.php",
+            "sources/sav-lumen-app/spec/*",
+            "/sources/sav-schema/spec/*.php",
             "sources/sav/spec"
         ]
     }
