@@ -375,18 +375,27 @@ class Sav
         $ctx->output = $output;
     }
 
-    public function matchUrl($url, $method)
-    {
+    public function matchBaseUrl ($url) {
         if ($this->opts['baseUrl']) {
             $baseUrl = $this->opts['baseUrl'];
             if (strpos($baseUrl, $url) == 0) {
-                $url = substr($url, count($baseUrl));
-            } else {
-                return ;
+                return substr($url, count($baseUrl));
             }
+            return false;
         }
-        $method = strtoupper($method);
-        return $this->router->matchRoute($url, $method);
+        return true;
+    }
+
+    public function matchUrl($url, $method)
+    {
+        $uri = $this->matchBaseUrl($url);
+        if ($uri) {
+            if (is_string($uri)) {
+                $url = $uri;
+            }
+            $method = strtoupper($method);
+            return $this->router->matchRoute($url, $method);
+        }
     }
     public function remote($name)
     {

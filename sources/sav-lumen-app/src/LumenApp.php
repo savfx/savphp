@@ -42,7 +42,7 @@ class LumenApp extends Application
           $request = $this->request;
         }
         $ctx = $this->createCtx($request);
-        if ($ctx->route) {
+        if ($ctx) {
             $response = $this->invokeCtx($ctx);
             if ($response instanceof SymfonyResponse) {
                 $response->send();
@@ -59,7 +59,7 @@ class LumenApp extends Application
     public function handle(SymfonyRequest $request)
     {
         $ctx = $this->createCtx($request);
-        if ($ctx->route) {
+        if ($ctx) {
             $response = $this->invokeCtx($ctx);
             if (count($this->middleware) > 0) {
                 $this->callTerminableMiddleware($response);
@@ -69,11 +69,15 @@ class LumenApp extends Application
         return parent::handle($request);
     }
     protected function createCtx($request) {
-        $method = $request->getMethod();
         $path = $request->getPathInfo();
-        $this->sav->prop('request', $request);
-        $ctx = $this->sav->prepare($path, $method, $request->toArray());
-        return $ctx;
+        if ($this->sav->matchBaseUrl($path)) {
+            $method = $request->getMethod();
+            $this->sav->prop('request', $request);
+            $ctx = $this->sav->prepare($path, $method, $request->toArray());
+            if ($ctx->route) {
+                return $ctx;
+            }
+        }
     }
     protected function invokeCtx($ctx) {
         try {
