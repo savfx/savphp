@@ -1,7 +1,7 @@
 {
     "name": "savfx/savphp",
     "type": "library",
-    "version": "1.x",
+    "version": "1.0-dev",
     "license": "MIT",
     "authors": [
         {
