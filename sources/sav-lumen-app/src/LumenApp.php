@@ -4,6 +4,9 @@ namespace SavLumenApp;
 
 use Sav\Sav;
 use Laravel\Lumen\Application;
+use Laravel\Lumen\Http\ResponseFactory;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class LumenApp extends Application
 {
@@ -31,22 +34,50 @@ class LumenApp extends Application
           $this->parseIncomingRequest($request);
           $request = $this->request;
         }
+        $ctx = $this->createCtx($request);
+        if ($ctx->route) {
+            $response = $this->invokeCtx($ctx);
+            if ($response instanceof SymfonyResponse) {
+                $response->send();
+            } else {
+                echo (string) $response;
+            }
+            if (count($this->middleware) > 0) {
+                $this->callTerminableMiddleware($response);
+            }
+            return;
+        }
+        parent::run($request);
+    }
+    public function handle(SymfonyRequest $request)
+    {
+        $ctx = $this->createCtx($request);
+        if ($ctx->route) {
+            $response = $this->invokeCtx($ctx);
+            if (count($this->middleware) > 0) {
+                $this->callTerminableMiddleware($response);
+            }
+            return $response;
+        }
+        return parent::handle($request);
+    }
+    protected function createCtx($request) {
         $method = $request->getMethod();
-        $path = '/'.trim($request->getPathInfo(), '/');
+        $path = $request->getPathInfo();
         $this->sav->prop('request', $request);
         $ctx = $this->sav->prepare($path, $method, $request->toArray());
-        if ($ctx->route) {
-            try {
-                return $this->sendThroughPipeline($this->middleware, function () use (&$ctx){
-                    $data = $ctx->sav->invoke($ctx);
-                    echo $data;
-                });
-            } catch (Exception $e) {
-                return $this->prepareResponse($this->sendExceptionToHandler($e));
-            } catch (Throwable $e) {
-                return $this->prepareResponse($this->sendExceptionToHandler($e));
-            }
+        return $ctx;
+    }
+    protected function invokeCtx($ctx) {
+        try {
+            return $this->sendThroughPipeline($this->middleware, function () use (&$ctx){
+                $data = $ctx->sav->invoke($ctx, false);
+                return response($data);
+            });
+        } catch (Exception $e) {
+            return $this->prepareResponse($this->sendExceptionToHandler($e));
+        } catch (Throwable $e) {
+            return $this->prepareResponse($this->sendExceptionToHandler($e));
         }
-        return parent::run($request);
     }
 }

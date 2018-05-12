@@ -41,7 +41,7 @@ class Sav
         $this->remoteRequestHandler = null;
         $this->remoteResponseHandler = null;
         if ($this->opts["contractFile"]) {
-            $this->load(include_once($this->opts["contractFile"]));
+            $this->load(include($this->opts["contractFile"]));
         }
     }
     /**
@@ -301,7 +301,7 @@ class Sav
                 $actionName = $route['name'];
                 $filePath = $this->opts['schemaPath'] . $actionName . '.php';
                 if (file_exists($filePath)) {
-                    $this->schema->load(include_once($filePath));
+                    $this->schema->load(include($filePath));
                     $struct = $this->schema->{$schemaName};
                 }
             }
@@ -317,7 +317,7 @@ class Sav
             if (!class_exists($className)) {
                 if (!$this->opts['psr']) {
                     $filePath = $this->opts['modalPath'] . $className . '.php';
-                    require_once($filePath);
+                    require($filePath);
                 }
                 spl_autoload($className);
             }
@@ -359,13 +359,11 @@ class Sav
         } catch (\Exception $exp) {
             $err = $exp;
         }
-        $len = ob_get_length();
-        if ($len) {
-            $buf = ob_get_clean();
-            if (!isset($output)) {
-                $ctx->buffer = $buf;
-                $output = $buf;
-            }
+        // $len = ob_get_length();
+        $buf = ob_get_clean();
+        if (!isset($output)) {
+            $ctx->buffer = $buf;
+            $output = $buf;
         }
         if ($err) {
             throw $err;
