@@ -173,6 +173,7 @@ class Sav
                     if (is_string($data)) {
                         return $data;
                     } elseif (is_array($data) || is_object($data)) {
+                        header("content-type: application/json");
                         return json_encode($data);
                     }
                 }
@@ -318,6 +319,7 @@ class Sav
                     $filePath = $this->opts['modalPath'] . $className . '.php';
                     require_once($filePath);
                 }
+                spl_autoload($className);
             }
             if (!class_exists($className)) {
                 return;
