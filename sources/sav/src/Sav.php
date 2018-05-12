@@ -174,7 +174,7 @@ class Sav
                     if (is_string($data)) {
                         return $data;
                     } elseif (is_array($data) || is_object($data)) {
-                        header("content-type: application/json");
+                        // header("content-type: application/json");
                         return json_encode($data);
                     }
                 }
