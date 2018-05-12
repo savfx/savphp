@@ -40,6 +40,7 @@ class Sav
         $this->remotes = array();
         $this->remoteRequestHandler = null;
         $this->remoteResponseHandler = null;
+        $this->outputHandler = null;
         if ($this->opts["contractFile"]) {
             $this->load(include($this->opts["contractFile"]));
         }
@@ -369,7 +370,7 @@ class Sav
             throw $err;
         }
         if ($ctx->outputSchema && (!$this->opts['disableOutputCheck'])) {
-            $output = $ctx->outputSchema->check($output);
+            $output = $ctx->outputSchema->check($this->handleOutput($output, $ctx));
         }
         $ctx->output = $output;
     }
@@ -404,6 +405,19 @@ class Sav
     public function setRemoteResponseHandler($handler)
     {
         $this->remoteResponseHandler = $handler;
+    }
+    public function setOutputHandler($handler)
+    {
+        $this->outputHandler = $handler;
+    }
+    public function handleOutput($output, $ctx) {
+        if ($this->outputHandler) {
+            return call_user_func_array(
+                $this->outputHandler,
+                array($output, $ctx)
+            );
+        }
+        return $output;
     }
     public function handleRemoteRequest($request, $action, $remote)
     {

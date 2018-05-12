@@ -5,6 +5,7 @@ namespace SavLumenApp;
 use Sav\Sav;
 use Laravel\Lumen\Application;
 use Laravel\Lumen\Http\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -26,6 +27,12 @@ class LumenApp extends Application
         }
         $sav = new Sav($opts);
         $sav->prop('app', $this);
+        $sav->setOutputHandler(function($output) {
+            if ($output instanceof JsonResponse) {
+                return $output->getData(true);
+            }
+            return $output;
+        });
         $this->sav = $sav;
     }
     public function run ($request = null)
