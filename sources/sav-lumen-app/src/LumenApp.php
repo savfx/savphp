@@ -15,8 +15,8 @@ class LumenApp extends Application
     {
         parent::__construct($basePath);
         $opts = array(
-            'contractFile' => $basePath.'/contract/contract.php',// 合约文件
-            'schemaPath' =>  $basePath.'/contract/schemas/', // 模型目录
+            'contractFile' => $basePath.'/contract/php/contract.php',// 合约文件
+            'schemaPath' =>  $basePath.'/contract/php/schemas/', // 模型目录
             'modalPath' => $basePath.'/app/Http/Controllers', // 模块目录
             'namespace' => 'App\\Http\\Controllers', // 模块命名空间
             'classSuffix' => 'Controller', // 模块名称后缀
